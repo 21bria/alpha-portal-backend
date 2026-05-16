@@ -1,0 +1,71 @@
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializer import LoginSerializer
+from apps.accounts.models_user_profile import UserProfile
+
+
+class LoginView(TokenObtainPairView):
+    permission_classes = [AllowAny]
+    serializer_class = LoginSerializer
+
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        perms = sorted(list(user.get_all_permissions()))
+        groups = list(user.groups.values("id", "name"))
+
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+
+        if not profile.full_name:
+            profile.full_name = f"{user.first_name or ''} {user.last_name or ''}".strip() or user.get_username()
+
+        if not profile.language:
+            profile.language = "id"
+
+        if not profile.timezone:
+            profile.timezone = "Asia/Jakarta"
+
+        profile.save()
+
+        if profile.avatar:
+            avatar_url = request.build_absolute_uri(profile.avatar.url)
+        elif profile.gender == "female":
+            avatar_url = "/avatars/default-female.jpg"
+        elif profile.gender == "male":
+            avatar_url = "/avatars/default-male.jpg"
+        else:
+            avatar_url = "/avatars/default-user.jpg"
+
+        return Response({
+            "user": {
+                "id": user.id,
+                "username": user.get_username(),
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "full_name": profile.full_name,
+                "role": user.role,
+                "is_superuser": user.is_superuser,
+                "is_system": user.is_system,
+                "is_global_viewer": user.is_global_viewer,
+                "is_admin_user": user.is_admin_user,
+                "groups": groups,
+                "permissions": perms,
+
+                "profile": {
+                    "full_name": profile.full_name,
+                    "gender": profile.gender,
+                    "avatar_url": avatar_url,
+                    "language": profile.language,
+                    "timezone": profile.timezone,
+                },
+            },
+        })
+
