@@ -10,7 +10,7 @@ venv/
 .env.*
 
 # Django media/static
-media/
+/media/
 staticfiles/
 
 # VSCode
