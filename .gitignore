@@ -26,3 +26,6 @@ staticfiles/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+db_vps.txt
+note.txt
