@@ -12,9 +12,11 @@ CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "https://apps.portal.kawi-nickel.com",
     "https://karyawijaya.com",
+    "https://www.karyawijaya.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://apps.portal.kawi-nickel.com",
     "https://karyawijaya.com",
+    "https://www.karyawijaya.com",
 ]
